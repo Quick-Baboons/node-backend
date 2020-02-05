@@ -59,13 +59,12 @@ router.get('/adlist', async (req, res) => {
 
 
       if(!adlist[room_id]) {
-        if(room_id === 23) console.log(room_id)
 
         adlist[room_id] = []
-        if(n.n !== null && n.n !== -1) adlist[room_id].push(n)
-        if(s.s !== null && s.s !== -1) adlist[room_id].push(s)
-        if(e.e !== null && e.e !== -1) adlist[room_id].push(e)
-        if(w.w !== null && w.w !== -1) adlist[room_id].push(w)
+        if(n.n !== null) adlist[room_id].push(n)
+        if(s.s !== null) adlist[room_id].push(s)
+        if(e.e !== null) adlist[room_id].push(e)
+        if(w.w !== null) adlist[room_id].push(w)
       }
 
     }
@@ -169,6 +168,7 @@ router.post('/move', async (req, res) => {
       Authorization: `Token ${token}`
     }
   }
+  console.log('BODY',req.body)
   let direction = req.body.direction
   
   // get player location info, specifcally current room id
@@ -187,6 +187,8 @@ router.post('/move', async (req, res) => {
       'direction': req.body.direction,
     }
 
+
+
     // Does our db know the room_id in the direction the user wants to go?
     let possible_exit = last_room[direction]
     // If we know the room id the user is trying to move to, add to postBody to get wise explorer bonus
@@ -196,7 +198,11 @@ router.post('/move', async (req, res) => {
 
     // hit /move endpoint with postBody as the body
     try {
+
+
+      console.log(postBody, auth)
       const newRoom = await axios.post('https://lambda-treasure-hunt.herokuapp.com/api/adv/move/', postBody, auth);
+
 
       let newRoomData = newRoom.data
 
@@ -214,7 +220,6 @@ router.post('/move', async (req, res) => {
           newRoomData[exit] = -1
         })
 
-        newRoomData[opposite[direction]] = last_room['room_id']
         // save to db
 
         delete newRoomData['players']
@@ -240,14 +245,7 @@ router.post('/move', async (req, res) => {
         })
 
 
-        console.log(newRoomData)
-        await Rooms.add(newRoomData)
-        // Update last room direction value
-        
       } else {
-        newRoomData['n'] = newRoomExist['n']
-        newRoomData['s'] = newRoomExist['s']
-        newRoomData['e'] = newRoomExist['e']
         newRoomData['w'] = newRoomExist['w']
         newRoomData[opposite[direction]] = last_room['room_id']
         // save to db
@@ -286,6 +284,7 @@ router.post('/move', async (req, res) => {
       return res.status(200).json(newRoomData)
 
     } catch (e) {
+      // console.log(e)
       return res.status(500).json({e, message:"ERROR WITH AXIOS PROBABLY"});
     }
   }
