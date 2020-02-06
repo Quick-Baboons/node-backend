@@ -89,11 +89,13 @@ router.get('/weighted', async (req,res) => {
 
       let terrain = rooms[room].terrain
 
-
-      let n = {n: rooms[room].n}
-      let s = {s:rooms[room].s}
-      let e = {e: rooms[room].e}
-      let w = {w:rooms[room].w}
+      weight = 7.5
+      if(terrain === 'TRAP') weight = 30
+      
+      let n = {n: rooms[room].n, weight}
+      let s = {s:rooms[room].s, weight}
+      let e = {e: rooms[room].e, weight}
+      let w = {w:rooms[room].w, weight}
 
 
       if(!adlist[room_id]) {
@@ -102,7 +104,6 @@ router.get('/weighted', async (req,res) => {
         if(s.s !== null) adlist[room_id].push(s)
         if(e.e !== null) adlist[room_id].push(e)
         if(w.w !== null) adlist[room_id].push(w)
-        adlist[room_id].push(terrain)
       }
 
     }
